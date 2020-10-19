@@ -25,6 +25,29 @@ Leverage the separability of Gaussian filtering
 Input: image, sigma (standard deviation)
 Output: smoothed image
 """
+
+def conv2d(img, kernel):
+    # Flip the kernel
+    kernel = np.flip(kernel)
+
+    # Instantiate the ouput as an image of the same dimensions of the input image
+    output = np.zeros_like(img)
+
+    # Compute the padding value
+    F = kernel.shape[0]
+    padding = int(np.ceil((F - 1) / 2))
+
+    # Add zero padding to the input img
+    img_padded = np.zeros((img.shape[0] + 2 * padding, img.shape[1] + 2 * padding))
+    img_padded[padding:-padding, padding:-padding] = img
+
+    # Compute the convolution for every pixel of the image
+    for x in range(img.shape[0]):
+        for y in range(img.shape[1]):
+            output[x, y] = np.multiply(img_padded[x:x + F, y:y + F], kernel).sum()
+            
+    return output
+
 def gaussianfilter(img, sigma):
     
     #...
