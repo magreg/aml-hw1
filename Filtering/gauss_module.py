@@ -12,9 +12,8 @@ The filter should be defined for all integer values x in the range [-3sigma,3sig
 The function should return the Gaussian values Gx computed at the indexes x
 """
 def gauss(sigma):
-    
-    #...
-    
+    x = np.arange(-3 * sigma, 3 * sigma + 1)
+    Gx = (1 / (np.sqrt(2 * np.pi) * sigma)) * (np.exp(-np.power(x, 2.) / (2 * np.power(sigma, 2.))))    
     return Gx, x
 
 
