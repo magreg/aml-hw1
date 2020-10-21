@@ -30,9 +30,6 @@ def conv2d(img, kernel):
     # Flip the kernel
     kernel = np.flip(kernel)
 
-    # Instantiate the ouput as an image of the same dimensions of the input image
-    output = np.zeros_like(img)
-
     # Compute the padding value
     F = kernel.shape[0]
     padding = int(np.ceil((F - 1) / 2))
@@ -41,12 +38,13 @@ def conv2d(img, kernel):
     img_padded = np.zeros((img.shape[0] + 2 * padding, img.shape[1] + 2 * padding))
     img_padded[padding:-padding, padding:-padding] = img
 
-    # Compute the convolution for every pixel of the image
-    for x in range(img.shape[0]):
-        for y in range(img.shape[1]):
-            output[x, y] = np.multiply(img_padded[x:x + F, y:y + F], kernel).sum()
-            
+    # Compute the sub matrices
+    sub_matrices = view_as_windows(img_padded, (F, F), 1)
+    # Compute the convolution with the element-wise multiplication of every sub matrix and sum
+    output = np.einsum('ij, klij -> kl', kernel, sub_matrices)
+
     return output
+
 
 def gaussianfilter(img, sigma):
     
