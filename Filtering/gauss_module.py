@@ -25,7 +25,6 @@ Leverage the separability of Gaussian filtering
 Input: image, sigma (standard deviation)
 Output: smoothed image
 """
-
 from skimage.util.shape import view_as_windows
 from enum import Enum
 
@@ -60,11 +59,12 @@ def conv(img, kernel, conv_type=ConvolutionType.TWO_D):
 
 
 def gaussianfilter(img, sigma):
-    
-    #...
+    # Compute the 1d-Gaussian
+    Gx, x = gauss(sigma)
 
-    return smooth_img
-
+    # Convolute twice with the Gaussian filter, first vertically and then horizontally
+    smooth_img = conv(img, Gx, conv_type=ConvolutionType.VERTICAL)
+    return conv(smooth_img, Gx, conv_type=ConvolutionType.HORIZONTAL)
 
 
 """
