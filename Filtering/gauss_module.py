@@ -26,24 +26,37 @@ Input: image, sigma (standard deviation)
 Output: smoothed image
 """
 
-def conv2d(img, kernel):
+from skimage.util.shape import view_as_windows
+from enum import Enum
+
+class ConvolutionType(Enum):
+    TWO_D = 1
+    VERTICAL = 2
+    HORIZONTAL = 3
+
+# Vectorize the convolution code
+def conv(img, kernel, conv_type=ConvolutionType.TWO_D):
     # Flip the kernel
     kernel = np.flip(kernel)
 
-    # Compute the padding value
-    F = kernel.shape[0]
-    padding = int(np.ceil((F - 1) / 2))
+    # Reshape the kernel according to the convolution type
+    if conv_type == ConvolutionType.VERTICAL:
+        kernel = kernel.reshape(kernel.shape[0], 1)
+    elif conv_type == ConvolutionType.HORIZONTAL:
+        kernel = kernel.reshape(1, kernel.shape[0])
 
-    # Add zero padding to the input img
-    img_padded = np.zeros((img.shape[0] + 2 * padding, img.shape[1] + 2 * padding))
-    img_padded[padding:-padding, padding:-padding] = img
+    # Compute the padding value and add zero padding to the input image
+    kern_dim = np.array(kernel.shape)
+    padding = np.ceil((kern_dim - 1) / 2).astype(int)
+    img_padded = np.zeros((img.shape[0] + 2 * padding[0], img.shape[1] + 2 * padding[1]))
 
-    # Compute the sub matrices
-    sub_matrices = view_as_windows(img_padded, (F, F), 1)
+    img_padded[padding[0]:img_padded.shape[0] - padding[0], padding[1]:img_padded.shape[1] - padding[1]] = img
+
+    # Compute the submatrices according to the kernel
+    sub_matrices = view_as_windows(img_padded, tuple(kern_dim), 1)
+
     # Compute the convolution with the element-wise multiplication of every sub matrix and sum
-    output = np.einsum('ij, klij -> kl', kernel, sub_matrices)
-
-    return output
+    return np.einsum('ij, klij -> kl', kernel, sub_matrices)
 
 
 def gaussianfilter(img, sigma):
